@@ -1,5 +1,6 @@
 from math import ceil
 from json import dump
+from os import environ
 
 from openai import AsyncOpenAI
 
@@ -15,9 +16,9 @@ load_dotenv()
 
 class AudioTranscription:
 
-    def __init__(self, api_key: str | None, ):
-        self.client: AsyncOpenAI = AsyncOpenAI(api_key=api_key)
-        self.audio_file: str = 'core/data/vol_engineers.wav'
+    def __init__(self):
+        self.client: AsyncOpenAI = AsyncOpenAI(api_key=environ.get('OPENAI_AI_KEY'))
+        self.audio_file: str = 'data/vol_engineers.wav'
 
     async def audio_chunks(self):
         if not (audio := AudioSegment.from_file(self.audio_file)):
@@ -30,8 +31,8 @@ class AudioTranscription:
             end_time = min((i + 1) * consts.SEGMENT_LENGHT,
                            total_length)
             segment = audio[start_time:end_time]
-            output_file = f'core/data/chunks/vol_{consts.FILE_SAVE}_part_{i + 1}.wav'
-            segment.export(output_file, format='m4a')
+            output_file = f'data/chunks/vol_{consts.FILE_SAVE}_part_{i + 1}.wav'
+            segment.export(output_file, format='wav')
             logger.info(f'Exported: {output_file}')
 
     @staticmethod
@@ -63,4 +64,4 @@ class AudioTranscription:
 
     async def run(self) -> None:
         await self.audio_chunks()
-        await self.trans_audio()
+        # await self.trans_audio()
